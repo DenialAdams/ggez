@@ -664,6 +664,44 @@ pub fn present(ctx: &mut Context) {
     gfx.device.cleanup();
 }
 
+/// Take a screenshot by outputting the screen buffer to a PNG file
+pub fn screenshot(ctx: &mut Context, path: &str) {
+    use gfx::memory::Typed;
+    use gfx::format::Formatted;
+    use gfx::format::SurfaceTyped;
+
+    let gfx = &mut ctx.gfx_context;
+    let (w, h, _, _) = gfx.data.out.get_dimensions();
+    type SurfaceData = <<ColorFormat as Formatted>::Surface as SurfaceTyped>::DataType;
+    let dl_buffer = gfx.factory.create_download_buffer::<SurfaceData>(w as usize * h as usize).unwrap();
+    // TODO UNWRAP
+    gfx.encoder.copy_texture_to_buffer_raw(
+        gfx.data.out.raw().get_texture(),
+        None,
+        gfx::texture::RawImageInfo {
+                    xoffset: 0,
+                    yoffset: 0,
+                    zoffset: 0,
+                    width: w,
+                    height: h,
+                    depth: 0,
+                    format: ColorFormat::get_format(),
+                    mipmap: 0,
+        },
+        dl_buffer.raw(),
+        0
+    ).unwrap();
+
+    let reader = gfx.factory.read_mapping(&dl_buffer).unwrap();
+    // intermediary buffer only to avoid casting
+    let mut data = Vec::with_capacity(w as usize * h as usize * 4);
+    for pixel in reader.iter() {
+        data.extend(pixel);
+    }
+    // TODO unwrap
+    image::save_buffer(path, &data, w as u32, h as u32, image::ColorType::RGBA(8)).unwrap();
+}
+
 /*
 // Draw an arc.
 // Punting on this until later.
