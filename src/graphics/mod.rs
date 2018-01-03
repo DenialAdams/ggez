@@ -673,6 +673,7 @@ pub fn screenshot(ctx: &mut Context, path: &str) {
     let gfx = &mut ctx.gfx_context;
     let (w, h, _, _) = gfx.data.out.get_dimensions();
     type SurfaceData = <<ColorFormat as Formatted>::Surface as SurfaceTyped>::DataType;
+    // TODO unwrap and move this?
     let dl_buffer = gfx.factory.create_download_buffer::<SurfaceData>(w as usize * h as usize).unwrap();
     // TODO UNWRAP
     gfx.encoder.copy_texture_to_buffer_raw(
@@ -693,11 +694,14 @@ pub fn screenshot(ctx: &mut Context, path: &str) {
     ).unwrap();
     gfx.encoder.flush(&mut *gfx.device);
 
+    // TODO unwrap
     let reader = gfx.factory.read_mapping(&dl_buffer).unwrap();
     // intermediary buffer only to avoid casting
     let mut data = Vec::with_capacity(w as usize * h as usize * 4);
-    for pixel in reader.iter() {
-        data.extend(pixel);
+    for row in reader.chunks(w as usize) {
+        for pixel in row.iter().rev() {
+            data.extend(pixel);
+        }
     }
     // TODO unwrap
     image::save_buffer(path, &data, w as u32, h as u32, image::ColorType::RGBA(8)).unwrap();
