@@ -672,6 +672,7 @@ pub fn screenshot(ctx: &mut Context, path: &str) {
 
     let gfx = &mut ctx.gfx_context;
     let (w, h, _, _) = gfx.data.out.get_dimensions();
+    println!("{} {} in screenshot", w, h);
     type SurfaceData = <<ColorFormat as Formatted>::Surface as SurfaceTyped>::DataType;
     // TODO unwrap and move this?
     let dl_buffer = gfx.factory.create_download_buffer::<SurfaceData>(w as usize * h as usize).unwrap();
@@ -696,7 +697,9 @@ pub fn screenshot(ctx: &mut Context, path: &str) {
 
     // TODO unwrap
     let reader = gfx.factory.read_mapping(&dl_buffer).unwrap();
-    // intermediary buffer only to avoid casting
+    // intermediary buffer to avoid casting (according to gfx example)
+    // and also to reverse the order in which we pass the rows
+    // so the screenshot isn't upside-down
     let mut data = Vec::with_capacity(w as usize * h as usize * 4);
     for row in reader.chunks(w as usize).rev() {
         for pixel in row.iter() {

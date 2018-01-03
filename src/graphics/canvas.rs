@@ -93,6 +93,52 @@ impl Canvas {
         // than the default; does that matter?
         self.image
     }
+
+    /*
+    /// Exports the canvas to an image on your hard disk
+    pub fn save_to_png(&self, path: &str) {
+        use gfx::memory::Typed;
+        use gfx::format::Formatted;
+        use gfx::format::SurfaceTyped;
+
+        let (w, h) = (self.image.width, self.image.height);
+        let buffer: String = self.image.texture.raw();
+        type SurfaceData = <<ColorFormat as Formatted>::Surface as SurfaceTyped>::DataType;
+        // TODO unwrap and move this?
+        let dl_buffer = gfx.factory.create_download_buffer::<SurfaceData>(w as usize * h as usize).unwrap();
+        // TODO UNWRAP
+        gfx.encoder.copy_texture_to_buffer_raw(
+            gfx.data.out.raw().get_texture(),
+            None,
+            gfx::texture::RawImageInfo {
+                        xoffset: 0,
+                        yoffset: 0,
+                        zoffset: 0,
+                        width: w as u16,
+                        height: h as u16,
+                        depth: 0,
+                        format: ColorFormat::get_format(),
+                        mipmap: 0,
+            },
+            dl_buffer.raw(),
+            0
+        ).unwrap();
+        gfx.encoder.flush(&mut *gfx.device);
+
+        // TODO unwrap
+        let reader = gfx.factory.read_mapping(&dl_buffer).unwrap();
+        // intermediary buffer to avoid casting (according to gfx example)
+        // and also to reverse the order in which we pass the rows
+        // so the screenshot isn't upside-down
+        let mut data = Vec::with_capacity(w as usize * h as usize * 4);
+        for row in reader.chunks(w as usize).rev() {
+            for pixel in row.iter() {
+                data.extend(pixel);
+            }
+        }
+        // TODO unwrap
+        image::save_buffer(path, &data, w as u32, h as u32, image::ColorType::RGBA(8)).unwrap();
+    } */
 }
 
 impl Drawable for Canvas {
@@ -112,6 +158,7 @@ impl Drawable for Canvas {
 pub fn set_canvas(ctx: &mut Context, target: Option<&Canvas>) {
     match target {
         Some(surface) => {
+            println!("{} {} in set canvas", surface.image.width, surface.image.height);
             ctx.gfx_context.data.out = surface.target.clone();
         }
         None => {
