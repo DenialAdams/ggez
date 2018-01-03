@@ -696,7 +696,7 @@ pub fn screenshot(ctx: &mut Context, path: &str) {
     let reader = gfx.factory.read_mapping(&dl_buffer).unwrap();
     // intermediary buffer only to avoid casting
     let mut data = Vec::with_capacity(w as usize * h as usize * 4);
-    for pixel in reader.iter() {
+    for pixel in reader.iter().rev() {
         data.extend(pixel);
     }
     // TODO unwrap
