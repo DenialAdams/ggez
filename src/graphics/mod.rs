@@ -691,6 +691,7 @@ pub fn screenshot(ctx: &mut Context, path: &str) {
         dl_buffer.raw(),
         0
     ).unwrap();
+    gfx.encoder.flush(&mut *gfx.device);
 
     let reader = gfx.factory.read_mapping(&dl_buffer).unwrap();
     // intermediary buffer only to avoid casting
