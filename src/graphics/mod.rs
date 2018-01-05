@@ -652,6 +652,8 @@ pub fn draw_ex(ctx: &mut Context, drawable: &Drawable, params: DrawParam) -> Gam
 
 /// Tells the graphics system to actually put everything on the screen.
 /// Call this at the end of your `EventHandler`'s `draw()` method.
+///
+/// Unsets any active canvas.
 pub fn present(ctx: &mut Context) {
     let gfx = &mut ctx.gfx_context;
     gfx.data.out = gfx.screen_render_target.clone();
